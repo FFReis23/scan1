@@ -1,0 +1,31 @@
+{
+  "name": "telegram-location-sender",
+  "version": "1.0.0",
+  "description": "A simple Express app to send location data to Telegram",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "form-data": "^4.0.2",
+    "sharp": "^0.34.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PedroHBessa/backscan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PedroHBessa/backscan/issues"
+  },
+  "homepage": "https://github.com/PedroHBessa/backscan#readme"
+}
